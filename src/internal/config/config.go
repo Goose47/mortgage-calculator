@@ -15,7 +15,7 @@ var errBadConfigFile = errors.New("unable to read config file")
 // Config represents main app configuration.
 type Config struct {
 	Env   string `yaml:"env"`
-	Port  string `yaml:"port"`
+	Port  int    `yaml:"port"`
 	Cache Cache  `yaml:"cache"`
 }
 
