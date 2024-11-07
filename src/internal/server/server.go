@@ -1,10 +1,23 @@
+// Package server defines router settings and application endpoints.
 package server
 
 import (
 	"github.com/gin-gonic/gin"
+	envpkg "mortgage-calculator/src/internal/lib/env"
 )
 
-func NewRouter() *gin.Engine {
+// NewRouter sets router mode based on env, defines handlers and options and creates new gin router.
+func NewRouter(env string) *gin.Engine {
+	var mode string
+	switch env {
+	case envpkg.Local:
+	case envpkg.Dev:
+		mode = gin.DebugMode
+	case envpkg.Prod:
+		mode = gin.ReleaseMode
+	}
+	gin.SetMode(mode)
+
 	r := gin.New()
 
 	r.RedirectTrailingSlash = true
