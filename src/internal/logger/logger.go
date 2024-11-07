@@ -1,29 +1,26 @@
+// Package logger provides constructor for log/slog package that defines config based on app environment.
 package logger
 
 import (
 	"log/slog"
+	envpkg "mortgage-calculator/src/internal/lib/env"
 	"os"
 )
 
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envProd  = "prod"
-)
-
+// New creates new slog instance based on app environment.
 func New(env string) *slog.Logger {
 	var log *slog.Logger
 
 	switch env {
-	case envLocal:
+	case envpkg.Local:
 		log = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelDebug,
 		}))
-	case envDev:
+	case envpkg.Dev:
 		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelDebug,
 		}))
-	case envProd:
+	case envpkg.Prod:
 		log = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelInfo,
 		}))
