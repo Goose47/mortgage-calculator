@@ -1,7 +1,7 @@
 .PHONY: list date
 
 lint:
-	@echo not implemented
+	@golangci-lint run -v
 
 test:
 	@echo not implemented
