@@ -18,14 +18,12 @@ type Server struct {
 	port   int
 }
 
-// New registers middleware and returns new server instance.
+// New returns new server instance.
 func New(
 	log *slog.Logger,
 	port int,
 	router *gin.Engine,
 ) *Server {
-	router.Use(gin.Recovery())
-
 	return &Server{
 		log:    log,
 		port:   port,

@@ -18,7 +18,7 @@ func New(
 	env string,
 	port int,
 ) *App {
-	router := server.NewRouter(env)
+	router := server.NewRouter(log, env)
 	serverApp := serverapp.New(log, port, router)
 
 	return &App{
