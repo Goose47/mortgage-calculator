@@ -21,7 +21,8 @@ type Config struct {
 
 // Cache represents cache configuration.
 type Cache struct {
-	TTL int `yaml:"ttl"`
+	TTL   int `yaml:"ttl"`
+	Clear int `yaml:"clear"` // Clear sets interval to clean expired cache entries.
 }
 
 // LoadPath loads configuration from specified path and returns config instance and error.
