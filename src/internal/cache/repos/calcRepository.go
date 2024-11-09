@@ -1,5 +1,5 @@
-// Package cache_repos provides repositories to interact with cache.
-package cache_repos
+// Package cacherepos provides repositories to interact with cache.
+package cacherepos
 
 import (
 	"context"
@@ -39,7 +39,7 @@ func (r *CalcRepository) Get(
 	ctx context.Context,
 	in *controllers.CalculateRequest,
 ) (*dto.CalcAggregates, error) {
-	const op = "cache_repos.calcRepository.Get"
+	const op = "cacherepos.calcRepository.Get"
 	log := r.log.With(slog.String("op", op))
 
 	log.Info("generating key")
@@ -80,7 +80,7 @@ func (r *CalcRepository) Set(
 	in *controllers.CalculateRequest,
 	aggregates *dto.CalcAggregates,
 ) error {
-	const op = "cache_repos.calcRepository.Set"
+	const op = "cacherepos.calcRepository.Set"
 	log := r.log.With(slog.String("op", op))
 
 	log.Info("generating key")
@@ -117,7 +117,7 @@ func (r *CalcRepository) Set(
 
 // Clear cleans expired items from cache.
 func (r *CalcRepository) Clear(ctx context.Context) {
-	const op = "cache_repos.calcRepository.Clear"
+	const op = "cacherepos.calcRepository.Clear"
 	log := r.log.With(slog.String("op", op))
 
 	log.Info("clearing expired cache entries")
@@ -129,7 +129,7 @@ func generateKey(in *controllers.CalculateRequest) (string, error) {
 	byteArr, err := json.Marshal(in)
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to unmarshal data: %w", err)
 	}
 
 	return string(byteArr), nil

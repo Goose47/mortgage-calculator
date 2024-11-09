@@ -12,35 +12,35 @@ import (
 // Cache stores cached data.
 type Cache struct {
 	log    *slog.Logger
-	ttl    int64
-	lastId int64
 	data   cache
-	sync.RWMutex
+	ttl    int64
+	lastID int64
+	mu     sync.RWMutex
 }
 
 type cache map[string]cacheItem
 
 type cacheItem struct {
-	id  int64
 	val []byte
+	id  int64
 	exp int64
 }
 
 // New is a constructor for Cache.
-func New(log *slog.Logger, TTL int64) *Cache {
+func New(log *slog.Logger, ttl int64) *Cache {
 	data := make(cache)
 
 	return &Cache{
 		log:  log,
-		ttl:  TTL,
+		ttl:  ttl,
 		data: data,
 	}
 }
 
 // Clear checks whether entries are expired and deletes them if true.
-func (c *Cache) Clear(ctx context.Context) {
-	c.Lock()
-	defer c.Unlock()
+func (c *Cache) Clear(_ context.Context) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
 	now := time.Now().Unix()
 	for key, item := range c.data {
@@ -52,11 +52,11 @@ func (c *Cache) Clear(ctx context.Context) {
 
 // Get returns value by key if latter exists else ErrKeyNotExists.
 func (c *Cache) Get(
-	ctx context.Context,
+	_ context.Context,
 	key string,
 ) ([]byte, error) {
-	c.RLock()
-	defer c.RUnlock()
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 
 	item, ok := c.data[key]
 
@@ -70,16 +70,16 @@ func (c *Cache) Get(
 
 // Set saves given value by given key and sets expiration time.
 func (c *Cache) Set(
-	ctx context.Context,
+	_ context.Context,
 	key string,
 	value []byte,
 ) error {
-	c.Lock()
-	defer c.Unlock()
+	c.mu.Lock()
+	defer c.mu.Unlock()
 
-	c.lastId++
+	c.lastID++
 	c.data[key] = cacheItem{
-		id:  c.lastId,
+		id:  c.lastID,
 		val: value,
 		exp: time.Now().Unix() + c.ttl,
 	}

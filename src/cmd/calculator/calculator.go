@@ -15,7 +15,7 @@ func main() {
 	log := logger.New(cfg.Env)
 	app := apppkg.New(log, cfg.Env, cfg.Port, int64(cfg.Cache.TTL))
 
-	//todo graceful stop
+	// todo graceful stop
 	go func() {
 		tick := time.NewTicker(time.Duration(cfg.Cache.Clear) * time.Second)
 		ctx := context.Background()

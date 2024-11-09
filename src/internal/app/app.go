@@ -7,19 +7,19 @@ import (
 	"mortgage-calculator/src/internal/api/controllers"
 	serverapp "mortgage-calculator/src/internal/app/server"
 	"mortgage-calculator/src/internal/cache/memory"
-	cache_repos "mortgage-calculator/src/internal/cache/repos"
+	cacherepos "mortgage-calculator/src/internal/cache/repos"
 	"mortgage-calculator/src/internal/server"
 	"mortgage-calculator/src/internal/services"
 )
 
-type Clearer interface {
+type clearer interface {
 	Clear(ctx context.Context)
 }
 
 // App represents application.
 type App struct {
 	Server *serverapp.Server
-	Cache  Clearer
+	Cache  clearer
 }
 
 // New creates all dependencies for App and returns new App instance.
@@ -30,7 +30,7 @@ func New(
 	cacheTTL int64,
 ) *App {
 	cache := memory.New(log, cacheTTL)
-	repo := cache_repos.NewCalcRepository(log, cache)
+	repo := cacherepos.NewCalcRepository(log, cache)
 
 	calcService := services.NewCalculatorService(log)
 
