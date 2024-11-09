@@ -35,7 +35,7 @@ func New(
 	calcService := services.NewCalculatorService(log)
 
 	calcCon := controllers.NewCalcController(calcService, repo)
-	cacheCon := controllers.NewCacheController()
+	cacheCon := controllers.NewCacheController(log, repo)
 
 	router := server.NewRouter(log, env, calcCon, cacheCon)
 	serverApp := serverapp.New(log, port, router)
