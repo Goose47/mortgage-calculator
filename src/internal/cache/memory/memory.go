@@ -86,3 +86,20 @@ func (c *Cache) Set(
 
 	return nil
 }
+
+// List returns all active cache entries.
+func (c *Cache) List(_ context.Context) ([]*cachepkg.Entry, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	res := make([]*cachepkg.Entry, 0)
+	for k, v := range c.data {
+		res = append(res, &cachepkg.Entry{
+			ID:  v.id,
+			Key: k,
+			Val: v.val,
+		})
+	}
+
+	return res, nil
+}

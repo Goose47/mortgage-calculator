@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"mortgage-calculator/src/internal/api/controllers"
+	cachepkg "mortgage-calculator/src/internal/cache"
 	"mortgage-calculator/src/internal/domain/dto"
 )
 
@@ -15,6 +16,7 @@ type Cache interface {
 	Get(ctx context.Context, key string) ([]byte, error)
 	Set(ctx context.Context, key string, value []byte) error
 	Clear(ctx context.Context)
+	List(ctx context.Context) ([]*cachepkg.Entry, error)
 }
 
 // CalcRepository is a repo to save and retrieve calculation results.
@@ -123,6 +125,53 @@ func (r *CalcRepository) Clear(ctx context.Context) {
 	log.Info("clearing expired cache entries")
 	r.cache.Clear(ctx)
 	log.Info("deleted expired items from cache")
+}
+
+// List lists all active items.
+func (r *CalcRepository) List(ctx context.Context) ([]*dto.CacheEntry, error) {
+	const op = "cacherepos.calcRepository.List"
+	log := r.log.With(slog.String("op", op))
+
+	log.Info("retrieving all cache items")
+
+	items, err := r.cache.List(ctx)
+	if err != nil {
+		log.Info("failed to retrieve cache items")
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	log.Info("cache items retrieved, unmarshalling")
+
+	res := make([]*dto.CacheEntry, len(items))
+
+	for i, item := range items {
+		var aggregates dto.CalcAggregates
+		err := json.Unmarshal(item.Val, &aggregates)
+		if err != nil {
+			log.Info("failed to unmarshal aggregates")
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		var params controllers.CalculateRequest
+		err = json.Unmarshal([]byte(item.Key), &params)
+		if err != nil {
+			log.Info("failed to unmarshal params")
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		res[i] = &dto.CacheEntry{
+			ID:         item.ID,
+			Aggregates: &aggregates,
+			Params: &dto.CalcParams{
+				ObjectCost:     params.ObjectCost,
+				InitialPayment: params.InitialPayment,
+				Months:         params.Months,
+			},
+			Program: &params.Program,
+		}
+	}
+
+	return res, nil
 }
 
 func generateKey(in *controllers.CalculateRequest) (string, error) {
