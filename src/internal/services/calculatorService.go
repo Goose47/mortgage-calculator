@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log/slog"
 	"mortgage-calculator/src/internal/domain/dto"
-	"time"
 )
 
 // CalculatorService provides api for calculating aggregates.
@@ -34,7 +33,6 @@ func (s *CalculatorService) Calculate(
 	_ dto.CalcProgram,
 ) (*dto.CalcAggregates, error) {
 	const op = "calculatorService.Calculate"
-	time.Sleep(2 * time.Second)
 	log := s.log.With(slog.String("op", op))
 
 	if float64(params.InitialPayment)/float64(params.ObjectCost) < minInitialPaymentRatio {
