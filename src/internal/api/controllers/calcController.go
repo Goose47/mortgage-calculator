@@ -16,19 +16,31 @@ type Calculator interface {
 	Calculate(ctx context.Context, params dto.CalcParams, program dto.CalcProgram) (*dto.CalcAggregates, error)
 }
 
+// CacheGetSaver interacts with cache.
+type CacheGetSaver interface {
+	Get(ctx context.Context, in *CalculateRequest) (*dto.CalcAggregates, error)
+	Set(ctx context.Context, in *CalculateRequest, aggregates *dto.CalcAggregates) error
+}
+
 // CalcController deals with calculation endpoints.
 type CalcController struct {
 	calculator Calculator
+	cache      CacheGetSaver
 }
 
 // NewCalcController is a constructor for CalcController.
-func NewCalcController(calculator Calculator) *CalcController {
+func NewCalcController(
+	calculator Calculator,
+	cache CacheGetSaver,
+) *CalcController {
 	return &CalcController{
 		calculator: calculator,
+		cache:      cache,
 	}
 }
 
-type calculateRequest struct {
+// CalculateRequest represents payload for Calculate endpoint
+type CalculateRequest struct {
 	dto.CalcParams
 	Program dto.CalcProgram `json:"program" binding:"required"`
 }
@@ -41,8 +53,10 @@ type calculateResponse struct {
 
 // Calculate validates request params, calculates params and composes result message.
 func (con *CalcController) Calculate(c *gin.Context) {
+	ctx := c.Request.Context()
+
 	// validate request
-	var in calculateRequest
+	var in CalculateRequest
 	err := c.ShouldBindJSON(&in)
 
 	if err != nil {
@@ -91,25 +105,28 @@ func (con *CalcController) Calculate(c *gin.Context) {
 		Months:         in.Months,
 	}
 
-	// calculate result
-	res, err := con.calculator.Calculate(
-		c.Request.Context(),
-		params,
-		in.Program,
-	)
-
+	// retrieve result from cache
+	res, err := con.cache.Get(ctx, &in)
 	if err != nil {
-		if errors.Is(err, services.ErrInsufficientInitialPayment) {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"error": services.ErrInsufficientInitialPayment.Error(),
+		// calculate result
+		res, err = con.calculator.Calculate(ctx, params, in.Program)
+
+		if err != nil {
+			if errors.Is(err, services.ErrInsufficientInitialPayment) {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": services.ErrInsufficientInitialPayment.Error(),
+				})
+				return
+			}
+
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": "failed to calculate params",
 			})
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to calculate params",
-		})
-		return
+		// save calculated result
+		err = con.cache.Set(ctx, &in, res)
 	}
 
 	// compose response
