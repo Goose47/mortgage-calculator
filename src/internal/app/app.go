@@ -4,10 +4,10 @@ package app
 import (
 	"context"
 	"log/slog"
-	"mortgage-calculator/src/internal/api/controllers"
 	serverapp "mortgage-calculator/src/internal/app/server"
 	"mortgage-calculator/src/internal/cache/memory"
 	cacherepos "mortgage-calculator/src/internal/cache/repos"
+	"mortgage-calculator/src/internal/controllers"
 	"mortgage-calculator/src/internal/server"
 	"mortgage-calculator/src/internal/services"
 )

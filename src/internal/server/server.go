@@ -4,7 +4,7 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"log/slog"
-	"mortgage-calculator/src/internal/api/controllers"
+	"mortgage-calculator/src/internal/controllers"
 	envpkg "mortgage-calculator/src/internal/lib/env"
 	"mortgage-calculator/src/internal/lib/server/middleware"
 )

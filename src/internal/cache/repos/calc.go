@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"mortgage-calculator/src/internal/api/controllers"
 	cachepkg "mortgage-calculator/src/internal/cache"
+	"mortgage-calculator/src/internal/controllers"
 	"mortgage-calculator/src/internal/domain/dto"
 )
 
