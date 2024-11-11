@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"mortgage-calculator/src/internal/domain/dto"
+	"time"
 )
 
 // CalculatorService provides api for calculating aggregates.
@@ -30,7 +32,7 @@ const minInitialPaymentRatio = 0.2
 func (s *CalculatorService) Calculate(
 	_ context.Context,
 	params dto.CalcParams,
-	_ dto.CalcProgram,
+	program dto.CalcProgram,
 ) (*dto.CalcAggregates, error) {
 	const op = "calculatorService.Calculate"
 	log := s.log.With(slog.String("op", op))
@@ -47,7 +49,55 @@ func (s *CalculatorService) Calculate(
 
 	log.Info("calculating aggregates")
 
-	log.Info("aggregates calculated")
+	months := float64(params.Months)
+	objectCost := float64(params.ObjectCost)
+	initialPayment := float64(params.InitialPayment)
 
-	return &dto.CalcAggregates{}, nil
+	annualRate := getAnnualRate(program)
+	G := annualRate / 12             // monthly rate
+	S := objectCost - initialPayment // mortgage debt (loan sum)
+
+	lastPaymentDate := time.Now().AddDate(0, params.Months, 0)
+	T := months // interest periods count
+
+	totalRate := math.Pow(1+G, T)
+	PM := math.Ceil(S * G * totalRate / (totalRate - 1)) // monthly payment
+
+	overpayment := PM*months - S
+
+	log.Info(
+		"aggregates calculated",
+		slog.Any("lastPaymentDate", lastPaymentDate),
+		slog.Float64("annualRate", annualRate),
+		slog.Float64("G", G),
+		slog.Float64("S", S),
+		slog.Float64("T", T),
+		slog.Float64("PM", PM),
+		slog.Float64("overpayment", overpayment),
+	)
+
+	return &dto.CalcAggregates{
+		LastPaymentDate: lastPaymentDate.Format("2006-01-02"),
+		Rate:            int(annualRate * 100),
+		LoanSum:         int(S),
+		MonthlyPayment:  int(PM),
+		Overpayment:     int(overpayment),
+	}, nil
+}
+
+const salaryRate = 0.08
+const militaryRate = 0.09
+const baseRate = 0.1
+
+func getAnnualRate(program dto.CalcProgram) float64 {
+	switch {
+	case program.Salary:
+		return salaryRate
+	case program.Military:
+		return militaryRate
+	case program.Base:
+		return baseRate
+	default:
+		return 0
+	}
 }
