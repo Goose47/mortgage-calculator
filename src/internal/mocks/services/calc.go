@@ -15,5 +15,5 @@ type MockCalculator struct {
 // Calculate mocks calculations.
 func (m *MockCalculator) Calculate(ctx context.Context, params dto.CalcParams, program dto.CalcProgram) (*dto.CalcAggregates, error) {
 	args := m.Called(ctx, params, program)
-	return args.Get(0).(*dto.CalcAggregates), args.Error(1) //nolint:wrapcheck // already returns wrapped errors
+	return args.Get(0).(*dto.CalcAggregates), args.Error(1) //nolint:wrapcheck,errcheck // already returns wrapped errors
 }

@@ -16,7 +16,7 @@ type MockCacheGetSaver struct {
 // Get mocks getting calc result.
 func (m *MockCacheGetSaver) Get(ctx context.Context, in *requests.CalculateRequest) (*dto.CalcAggregates, error) {
 	args := m.Called(ctx, in)
-	return args.Get(0).(*dto.CalcAggregates), args.Error(1) //nolint:wrapcheck // already returns wrapped errors
+	return args.Get(0).(*dto.CalcAggregates), args.Error(1) //nolint:wrapcheck,errcheck // already returns wrapped errors
 }
 
 // Set mocks setting calc result.
@@ -28,5 +28,5 @@ func (m *MockCacheGetSaver) Set(ctx context.Context, in *requests.CalculateReque
 // List mocks listing calc results.
 func (m *MockCacheGetSaver) List(ctx context.Context) ([]*dto.CacheEntry, error) {
 	args := m.Called(ctx)
-	return args.Get(0).([]*dto.CacheEntry), args.Error(1) //nolint:wrapcheck // already returns wrapped errors
+	return args.Get(0).([]*dto.CacheEntry), args.Error(1) //nolint:wrapcheck,errcheck // already returns wrapped errors
 }
