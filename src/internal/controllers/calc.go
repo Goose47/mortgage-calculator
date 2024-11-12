@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
+	"log/slog"
 	"mortgage-calculator/src/internal/domain/dto"
 	"mortgage-calculator/src/internal/domain/dto/requests"
 	"mortgage-calculator/src/internal/services"
@@ -26,16 +27,19 @@ type CacheGetSaver interface {
 
 // CalcController deals with calculation endpoints.
 type CalcController struct {
+	log        *slog.Logger
 	calculator Calculator
 	cache      CacheGetSaver
 }
 
 // NewCalcController is a constructor for CalcController.
 func NewCalcController(
+	log *slog.Logger,
 	calculator Calculator,
 	cache CacheGetSaver,
 ) *CalcController {
 	return &CalcController{
+		log:        log,
 		calculator: calculator,
 		cache:      cache,
 	}
@@ -87,7 +91,9 @@ func (con *CalcController) Calculate(c *gin.Context) {
 		}
 
 		// save calculated result
-		_ = con.cache.Set(ctx, in, res)
+		if err := con.cache.Set(ctx, in, res); err != nil {
+			con.log.Warn("failed to cache result", slog.Any("error", err))
+		}
 	}
 
 	// compose response
