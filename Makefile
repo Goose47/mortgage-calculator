@@ -4,7 +4,11 @@ lint:
 	@golangci-lint run -v
 
 test:
-	@echo not implemented
+	go list ./... | \
+	grep -v '/mocks/' | \
+ 	xargs go test -tags test -coverprofile="coverage.out" ./... && \
+ 	go tool cover -func="coverage.out" && \
+ 	rm "coverage.out"
 
 build:
 	@echo not implemented
