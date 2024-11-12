@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log/slog"
 	cachepkg "mortgage-calculator/src/internal/cache"
-	"mortgage-calculator/src/internal/controllers"
 	"mortgage-calculator/src/internal/domain/dto"
+	"mortgage-calculator/src/internal/domain/dto/requests"
 )
 
 // Cache represents cache api.
@@ -39,7 +39,7 @@ func NewCalcRepository(
 // Get generates key by input and returns cached result.
 func (r *CalcRepository) Get(
 	ctx context.Context,
-	in *controllers.CalculateRequest,
+	in *requests.CalculateRequest,
 ) (*dto.CalcAggregates, error) {
 	const op = "cacherepos.calcRepository.Get"
 	log := r.log.With(slog.String("op", op))
@@ -79,7 +79,7 @@ func (r *CalcRepository) Get(
 // Set generates key by input, marshals result and caches it.
 func (r *CalcRepository) Set(
 	ctx context.Context,
-	in *controllers.CalculateRequest,
+	in *requests.CalculateRequest,
 	aggregates *dto.CalcAggregates,
 ) error {
 	const op = "cacherepos.calcRepository.Set"
@@ -152,7 +152,7 @@ func (r *CalcRepository) List(ctx context.Context) ([]*dto.CacheEntry, error) {
 			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 
-		var params controllers.CalculateRequest
+		var params requests.CalculateRequest
 		err = json.Unmarshal([]byte(item.Key), &params)
 		if err != nil {
 			log.Info("failed to unmarshal params")
@@ -174,7 +174,7 @@ func (r *CalcRepository) List(ctx context.Context) ([]*dto.CacheEntry, error) {
 	return res, nil
 }
 
-func generateKey(in *controllers.CalculateRequest) (string, error) {
+func generateKey(in *requests.CalculateRequest) (string, error) {
 	byteArr, err := json.Marshal(in)
 
 	if err != nil {

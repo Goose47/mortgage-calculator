@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"mortgage-calculator/src/internal/domain/dto"
+	"mortgage-calculator/src/internal/domain/dto/requests"
 	"mortgage-calculator/src/internal/services"
 	"net/http"
 )
@@ -19,8 +20,8 @@ type Calculator interface {
 
 // CacheGetSaver interacts with cache.
 type CacheGetSaver interface {
-	Get(ctx context.Context, in *CalculateRequest) (*dto.CalcAggregates, error)
-	Set(ctx context.Context, in *CalculateRequest, aggregates *dto.CalcAggregates) error
+	Get(ctx context.Context, in *requests.CalculateRequest) (*dto.CalcAggregates, error)
+	Set(ctx context.Context, in *requests.CalculateRequest, aggregates *dto.CalcAggregates) error
 }
 
 // CalcController deals with calculation endpoints.
@@ -38,12 +39,6 @@ func NewCalcController(
 		calculator: calculator,
 		cache:      cache,
 	}
-}
-
-// CalculateRequest represents payload for Calculate endpoint.
-type CalculateRequest struct {
-	dto.CalcParams
-	Program dto.CalcProgram `json:"program" binding:"required"`
 }
 
 type calculateResponse struct {
@@ -110,9 +105,9 @@ var errValidation = errors.New("validation error")
 var errNoProgram = errors.New("choose program")
 var errTooManyPrograms = errors.New("choose only 1 program")
 
-func validateRequest(c *gin.Context) (*CalculateRequest, error) {
+func validateRequest(c *gin.Context) (*requests.CalculateRequest, error) {
 	// validate request
-	var in CalculateRequest
+	var in requests.CalculateRequest
 	err := c.ShouldBindJSON(&in)
 
 	if err != nil {
