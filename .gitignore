@@ -1,4 +1,4 @@
 .idea
 *.xlsx
-.coverage.out
+coverage.out
 task.md
