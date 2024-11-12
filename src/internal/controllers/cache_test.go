@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -49,5 +50,27 @@ func TestCacheController_List_EmptyCache(t *testing.T) {
 		t,
 		w.Body.String(),
 		"empty cache",
+	)
+}
+
+func TestCacheController_List_InternalError(t *testing.T) {
+	con, r := setup2()
+
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+
+	req, _ := http.NewRequest("GET", "/cache", nil)
+	c.Request = req
+
+	r.On("List", mock.Anything).Return([]*dto.CacheEntry{}, errors.New("internal server error"))
+
+	con.List(c)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	require.Contains(
+		t,
+		w.Body.String(),
+		"failed to retrieve cache entries",
 	)
 }
