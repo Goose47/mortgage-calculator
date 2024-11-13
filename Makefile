@@ -9,10 +9,15 @@ test:
 	rm "coverage.out"
 
 build:
-	@echo not implemented
+	@docker build -t mortgage_calculator . && \
+	docker image ls | head -n 1 && \
+	docker image ls | grep mortgage_calculator
 
 run:
-	@echo not implemented
+	@docker run -p "8080:8080" -d --name "mortgage_calculator" mortgage_calculator && \
+	docker ps | head -n 1 && \
+	docker ps | grep mortgage_calculator
 
 stoprm:
-	@echo not implemented
+	@docker stop mortgage_calculator && \
+	docker container rm mortgage_calculator
