@@ -3,7 +3,7 @@ FROM golang:alpine AS builder
 WORKDIR /build
 ADD go.mod .
 COPY .. .
-RUN go build -o app ./src/cmd/calculator/calculator.go
+RUN go build -mod=vendor -o app ./src/cmd/calculator/calculator.go
 
 FROM alpine
 
