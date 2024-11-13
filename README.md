@@ -11,8 +11,8 @@
 env: "prod"
 port: 8080
 cache:
-  ttl: 3600
-  clear: 3600
+  ttl: 10
+  clear: 10
 ```
 
 ## Требования
