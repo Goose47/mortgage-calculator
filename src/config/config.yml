@@ -1,5 +1,5 @@
-env: "local"
+env: "prod"
 port: 8080
 cache:
-  ttl: 5
-  clear: 10
+  ttl: 3600
+  clear: 3600
